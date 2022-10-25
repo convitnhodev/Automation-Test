@@ -6,9 +6,9 @@ import (
 )
 
 type User struct {
-	UserName string `bson:"username,omitempty"`
+	UserName string `json:"user_name" bson:"user_name,omitempty"`
 	Password string `bson:"password"`
-	FullName string `bson:"fullname"`
+	FullName string `json:"full_name" bson:"full_name"`
 	Company  string `bson:"company,omitempty"`
 }
 

@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (db *mongoStore) CreateNode(ctx context.Context, data *nodeModel.Node) (*mongo.InsertOneResult, error) {
-	collection := db.db.Database("AutomationTest").Collection("Node")
+func (db *mongoStore) PostResult(ctx context.Context, data *nodeModel.Node) (*mongo.InsertOneResult, error) {
+	collection := db.db.Database("AutomationTest").Collection("Node_Result")
 
 	res, err := collection.InsertOne(ctx, data)
 	if err != nil {

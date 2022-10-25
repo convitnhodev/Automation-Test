@@ -26,9 +26,12 @@ func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.Use
 		return err
 	}
 
-	if user, err := biz.store.FindUser(ctx, bson.M{"username": data.UserName}); user != nil {
-		component.InfoLogger.Println("User is registed before")
-		return common.ErrEntityExisted("User Register", err)
+	if user, err := biz.store.FindUser(ctx, bson.M{"user_name": data.UserName}); err != nil {
+
+		if err != common.RecordNotFound {
+			return common.ErrDB(err)
+		}
+		return err
 	}
 
 	if err := biz.store.CreateUser(ctx, data); err != nil {

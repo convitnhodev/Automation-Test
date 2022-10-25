@@ -5,35 +5,38 @@ import (
 	"backend_autotest/component"
 	"backend_autotest/modules/node/nodeModel"
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type AddSeftNodeStore interface {
+type AddNodeStore interface {
 	FindNode(ctx context.Context, conditions map[string]interface{}) (*nodeModel.Node, error)
-	CreateStore(ctx context.Context, data *nodeModel.Node) error
+	CreateNode(ctx context.Context, data *nodeModel.Node) (*mongo.InsertOneResult, error)
+	DeleteNode(ctx context.Context, conditions interface{}) error
 }
 
-type addSeftNodeBiz struct {
-	store AddSeftNodeStore
+type addNodeBiz struct {
+	store AddNodeStore
 }
 
-func NewAddSeftNodeBiz(store AddSeftNodeStore) *addSeftNodeBiz {
-	return &addSeftNodeBiz{store}
+func NewAddNodeBiz(store AddNodeStore) *addNodeBiz {
+	return &addNodeBiz{store}
 }
 
-func (biz *addSeftNodeBiz) AddNewSeftNode(ctx context.Context, data *nodeModel.Node) error {
+func (biz *addNodeBiz) AddNewNode(ctx context.Context, data *nodeModel.Node) (*mongo.InsertOneResult, error) {
 	if err := data.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
-	if node, err := biz.store.FindNode(ctx, map[string]interface{}{"serial_number": data.SerialNumber}); node != nil {
-		component.InfoLogger.Println("Node is registed before")
-		return common.ErrEntityExisted(" Node Register", err)
+	if err := biz.store.DeleteNode(ctx, bson.M{"node_id": data.NodeId}); err != nil {
+		return nil, common.ErrCannotDeleteEntity("Node", err)
 	}
 
-	if err := biz.store.CreateStore(ctx, data); err != nil {
+	result, err := biz.store.CreateNode(ctx, data)
+	if err != nil {
 		component.InfoLogger.Println("Can not Create Node")
-		return common.ErrCannotCreateEntity("Node Registerd", err)
+		return nil, common.ErrCannotCreateEntity("Node Registerd", err)
 	}
 
-	return nil
+	return result, nil
 }
