@@ -6,21 +6,25 @@ import (
 	"backend_autotest/modules/user/userModel"
 	"context"
 	"errors"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (db *mongoStore) FindUser(ctx context.Context, conditions map[string]interface{}) (*userModel.User, error) {
+func (db *mongoStore) FindUser(ctx context.Context, conditions interface{}) (*userModel.User, error) {
 	collection := db.db.Database("AutomationTest").Collection("User")
 
-	var data *userModel.User
+	var data bson.M
 
-	if err := collection.FindOne(ctx, conditions).Decode(data); err != nil {
+	if err := collection.FindOne(ctx, conditions).Decode(&data); err != nil {
+		if err.Error() == "mongo: no documents in result" {
+			return nil, errors.New("record not found")
+		}
+
 		component.ErrorLogger.Println("Can't Insert to DB, something DB is error")
 		return nil, common.ErrDB(err)
 	}
 
-	if data == nil {
-		return nil, errors.New("record not found")
-	}
-
-	return data, nil
+	var result userModel.User
+	bsonBytes, _ := bson.Marshal(data)
+	bson.Unmarshal(bsonBytes, &result)
+	return &result, nil
 }

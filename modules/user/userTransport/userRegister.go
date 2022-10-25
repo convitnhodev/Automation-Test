@@ -1,38 +1,28 @@
 package userTransport
 
 import (
+	"backend_autotest/common"
 	"backend_autotest/component"
 	"backend_autotest/modules/user/userBiz"
 	"backend_autotest/modules/user/userModel"
 	"backend_autotest/modules/user/userStorage"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
-func UserRegister(app component.AppContext) http.HandlerFunc {
-	fb := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Welcome teachers!")
-		body, err := ioutil.ReadAll(r.Body)
-
-		if err != nil {
-			panic(err)
-		}
-
+func UserRegister(app component.AppContext) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		var data userModel.User
-		if err := json.Unmarshal(body, &data); err != nil {
-			panic(err)
+		if err := c.ShouldBind(&data); err != nil {
+			panic(common.ErrInvalidRequest(err))
 		}
-
+		//
 		store := userStorage.NewMongoStore(app.GetNewDataMongoDB())
 		biz := userBiz.NewCreateUserBiz(store)
-		if err := biz.CreateNewUser(r.Context(), &data); err != nil {
+		if err := biz.CreateNewUser(c.Request.Context(), &data); err != nil {
 			panic(err)
 		}
 
-		fmt.Fprint(w, "successful registration")
-	}
+		c.JSON(200, data)
 
-	return http.HandlerFunc(fb)
+	}
 }

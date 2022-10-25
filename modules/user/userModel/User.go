@@ -6,15 +6,15 @@ import (
 )
 
 type User struct {
-	UserName string `bson:"user_name,omitempty"`
+	UserName string `bson:"username,omitempty"`
 	Password string `bson:"password"`
-	FullName string `bson:"full_name"`
+	FullName string `bson:"fullname"`
 	Company  string `bson:"company,omitempty"`
 }
 
 func (user *User) Validate() error {
 
-	// check validate of email
+	//check validate of email
 	user.UserName = strings.TrimSpace(user.UserName)
 	user.FullName = strings.TrimSpace(user.FullName)
 	user.Company = strings.TrimSpace(user.Company)

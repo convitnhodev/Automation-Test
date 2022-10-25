@@ -5,11 +5,12 @@ import (
 	"backend_autotest/component"
 	"backend_autotest/modules/user/userModel"
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type CreateUserStore interface {
 	CreateUser(ctx context.Context, data *userModel.User) error
-	FindUser(ctx context.Context, conditions map[string]interface{}) (*userModel.User, error)
+	FindUser(ctx context.Context, conditions interface{}) (*userModel.User, error)
 }
 
 type createUserBiz struct {
@@ -25,7 +26,7 @@ func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.Use
 		return err
 	}
 
-	if user, err := biz.store.FindUser(ctx, map[string]interface{}{"user_name": data.UserName}); user != nil {
+	if user, err := biz.store.FindUser(ctx, bson.M{"username": data.UserName}); user != nil {
 		component.InfoLogger.Println("User is registed before")
 		return common.ErrEntityExisted("User Register", err)
 	}
