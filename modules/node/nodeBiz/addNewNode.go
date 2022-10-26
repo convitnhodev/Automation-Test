@@ -29,7 +29,8 @@ func (biz *addNodeBiz) AddNewNode(ctx context.Context, data *nodeModel.Node) (*m
 	}
 
 	if err := biz.store.DeleteNode(ctx, bson.M{"node_id": data.NodeId}); err != nil {
-		return nil, common.ErrCannotDeleteEntity("Node", err)
+		// nay em thay no khong tra ra loi khi tim thay :V, nen loi chac cua database thoi
+		return nil, common.ErrDB(err)
 	}
 
 	result, err := biz.store.CreateNode(ctx, data)

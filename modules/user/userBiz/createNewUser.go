@@ -2,7 +2,6 @@ package userBiz
 
 import (
 	"backend_autotest/common"
-	"backend_autotest/component"
 	"backend_autotest/modules/user/userModel"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,17 +25,20 @@ func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.Use
 		return err
 	}
 
-	if user, err := biz.store.FindUser(ctx, bson.M{"user_name": data.UserName}); err != nil {
-
-		if err != common.RecordNotFound {
+	user, err := biz.store.FindUser(ctx, bson.M{"user_name": data.UserName})
+	if err != nil {
+		if err.Error() != common.RecordNotFound {
 			return common.ErrDB(err)
 		}
-		return err
+
+	}
+
+	if user != nil {
+		return common.ErrEntityExisted("User", nil)
 	}
 
 	if err := biz.store.CreateUser(ctx, data); err != nil {
-		component.InfoLogger.Println("Can not Create User")
-		return common.ErrCannotCreateEntity("User Registerd", err)
+		return common.ErrDB(err)
 	}
 
 	return nil

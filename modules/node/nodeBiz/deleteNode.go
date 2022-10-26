@@ -21,6 +21,7 @@ func NewDeleteNodeBiz(store DeleteNodeStore) *deleteNodeBiz {
 
 func (biz *deleteNodeBiz) DeleteNode(ctx context.Context, data *nodeModel.Node) error {
 	if err := biz.store.DeleteNode(ctx, bson.M{"node_id": data.NodeId}); err != nil {
+		// loi do db tra ra
 		return common.ErrCannotDeleteEntity("Node", err)
 	}
 	return nil

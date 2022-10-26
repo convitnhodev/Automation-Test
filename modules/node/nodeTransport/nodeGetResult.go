@@ -22,7 +22,8 @@ func NodeGetResult(app component.AppContext) gin.HandlerFunc {
 		biz := nodeBiz.NewGetResultBiz(store)
 		result, err := biz.GetResult(c.Request.Context(), data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
+			return
 		}
 
 		c.JSON(200, common.SimpleSuccessResponse(result))

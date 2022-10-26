@@ -5,7 +5,6 @@ import (
 	"backend_autotest/component"
 	"backend_autotest/modules/node/nodeModel"
 	"context"
-	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -15,8 +14,8 @@ func (db *mongoStore) GetResult(ctx context.Context, conditions interface{}) (*n
 
 	collection := db.db.Database("AutomationTest").Collection("Node_Result")
 	if err := collection.FindOne(ctx, conditions).Decode(&data); err != nil {
-		if err.Error() == "mongo: no documents in result" {
-			return nil, errors.New("record not found")
+		if err.Error() == common.RecordNotFound {
+			return nil, err
 		}
 
 		component.ErrorLogger.Println("Can't Insert to DB, something DB is error")

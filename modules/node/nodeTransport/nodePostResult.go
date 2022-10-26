@@ -27,9 +27,10 @@ func NodePostResult(app component.AppContext) gin.HandlerFunc {
 		biz := nodeBiz.NewAddResultBiz(store)
 		_, err := biz.AddNewResult(c.Request.Context(), &data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
+			return
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse("sucess"))
+		c.JSON(200, common.SimpleSuccessResponse("success"))
 	}
 }

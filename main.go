@@ -48,7 +48,6 @@ func runService(db *mongo.Client) error {
 	{
 		command.POST("/new", commandTransport.NewNodeCommand(appCtx))
 		command.GET("/get", commandTransport.GetAndDeleteCommand(appCtx))
-
 	}
 
 	return r.Run(":8080")

@@ -126,6 +126,14 @@ func ErrEntityExisted(entity string, err error) *AppError {
 	)
 }
 
+func ErrEntityNotExist(entity string, err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("%s not exist", strings.ToLower(entity)),
+		fmt.Sprintf("%s Not exist", entity),
+	)
+}
+
 func ErrCannotCreateEntity(entity string, err error) *AppError {
 	return NewCustomError(
 		err,

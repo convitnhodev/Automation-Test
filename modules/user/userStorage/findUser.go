@@ -2,7 +2,6 @@ package userStorage
 
 import (
 	"backend_autotest/common"
-	"backend_autotest/component"
 	"backend_autotest/modules/user/userModel"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,11 +13,9 @@ func (db *mongoStore) FindUser(ctx context.Context, conditions interface{}) (*us
 	var data bson.M
 
 	if err := collection.FindOne(ctx, conditions).Decode(&data); err != nil {
-		if err.Error() == "mongo: no documents in result" {
+		if err.Error() == common.RecordNotFound {
 			return nil, err
 		}
-
-		component.ErrorLogger.Println("Can't Insert to DB, something DB is error")
 		return nil, common.ErrDB(err)
 	}
 

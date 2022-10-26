@@ -23,7 +23,10 @@ func (biz *getResultBiz) GetResult(ctx context.Context, conditions interface{}) 
 
 	result, err := biz.store.GetResult(ctx, bson.M{"node_id": conditions})
 	if err != nil {
-		common.ErrCannotGetEntity("Result of Node", err)
+		if err.Error() == common.RecordNotFound {
+			return nil, common.ErrEntityNotExist("node", nil)
+		}
+		common.ErrDB(err)
 	}
 	return result, nil
 }

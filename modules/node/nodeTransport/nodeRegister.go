@@ -23,7 +23,8 @@ func NodeRegister(app component.AppContext) gin.HandlerFunc {
 		biz := nodeBiz.NewAddNodeBiz(store)
 		result, err := biz.AddNewNode(c.Request.Context(), &data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
+			return
 		}
 
 		c.JSON(200, common.SimpleSuccessResponse(result))

@@ -23,7 +23,8 @@ func NodeList(app component.AppContext) gin.HandlerFunc {
 		biz := nodeBiz.NewListNodeBiz(store)
 		result, err := biz.ListNode(c.Request.Context(), &data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
+			return
 		}
 
 		c.JSON(200, common.SimpleSuccessResponse(result))
