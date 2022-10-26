@@ -23,7 +23,7 @@ func NewNodeCommand(app component.AppContext) gin.HandlerFunc {
 
 		err := biz.AddNodeCommand(c.Request.Context(), &data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
 		}
 
 		c.JSON(200, common.SimpleSuccessResponse("add data success"))

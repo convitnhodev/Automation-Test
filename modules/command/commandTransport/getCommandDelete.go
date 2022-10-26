@@ -23,7 +23,7 @@ func GetAndDeleteCommand(app component.AppContext) gin.HandlerFunc {
 
 		result, err := biz.FindCommandAndDelete(c.Request.Context(), &data)
 		if err != nil {
-			panic(err)
+			c.JSON(400, err)
 		}
 
 		c.JSON(200, common.SimpleSuccessResponse(result))
