@@ -22,7 +22,7 @@ func NewCreateUserBiz(store CreateUserStore) *createUserBiz {
 
 func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.User) error {
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrInvalidPassword(err)
 	}
 
 	user, err := biz.store.FindUser(ctx, bson.M{"user_name": data.UserName})

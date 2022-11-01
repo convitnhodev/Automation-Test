@@ -1,16 +1,18 @@
 package main
 
 import (
-	"backend_autotest/modules/command/commandTransport"
-	"backend_autotest/modules/node/nodeTransport"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"backend_autotest/common"
 	"backend_autotest/component"
-
+	"backend_autotest/middleware"
+	"backend_autotest/modules/command/commandTransport"
+	"backend_autotest/modules/node/nodeTransport"
 	"backend_autotest/modules/user/userTransport"
 )
 
@@ -18,21 +20,25 @@ func main() {
 
 	db := common.InitMongoDB()
 
+	redis := common.InitRedis()
+
 	fmt.Println(db)
 
-	if err := runService(db); err != nil {
+	if err := runService(db, redis); err != nil {
 		log.Fatalln(err)
 	}
 
 }
 
-func runService(db *mongo.Client) error {
+func runService(db *mongo.Client, redis *redis.Client) error {
 	r := gin.Default()
-	appCtx := component.NewAppContext(db)
+	appCtx := component.NewAppContext(db, "abc&1*~#^2^#s0^=)^^7%b34", redis)
 
 	user := r.Group("/user")
 	{
 		user.POST("/register", userTransport.UserRegister(appCtx))
+		user.POST("/login", userTransport.UserLogin(appCtx))
+		user.GET("/profile", middleware.RequireAuth(appCtx), userTransport.GetProfile(appCtx))
 	}
 
 	node := r.Group("/node")

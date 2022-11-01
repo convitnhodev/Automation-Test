@@ -7,9 +7,14 @@ import (
 
 type User struct {
 	UserName string `json:"user_name" bson:"user_name,omitempty"`
-	Password string `bson:"password"`
+	Password string `json:"password" bson:"password"`
 	FullName string `json:"full_name" bson:"full_name"`
 	Company  string `bson:"company,omitempty"`
+}
+
+type UserLogin struct {
+	UserName string `json:"user_name" bson:"user_name,omitempty"`
+	Password string `json:"password"bson:"password"`
 }
 
 func (user *User) Validate() error {
@@ -33,4 +38,8 @@ func (user *User) Validate() error {
 	}
 
 	return nil
+}
+
+func (user *User) GetUserName() string {
+	return user.UserName
 }

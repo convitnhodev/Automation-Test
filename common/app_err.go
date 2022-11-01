@@ -181,3 +181,11 @@ func ErrInvalidPassword(err error) *AppError {
 		fmt.Sprintf("ErrInvalidPassword"),
 	)
 }
+
+func CannotLogin(err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("Can not Login"),
+		fmt.Sprintf("Generate Token fail"),
+	)
+}
