@@ -14,7 +14,7 @@ func NewNodeCommand(app component.AppContext) gin.HandlerFunc {
 
 		var data commandModel.CommandNode
 		data.User = c.MustGet(component.CurrentUser).(component.Requester).GetUserName()
-		
+
 		if err := c.ShouldBindJSON(&data); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
@@ -27,6 +27,6 @@ func NewNodeCommand(app component.AppContext) gin.HandlerFunc {
 			c.JSON(400, err)
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse("add data success"))
+		c.JSON(200, "SUCCESS")
 	}
 }

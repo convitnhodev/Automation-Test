@@ -27,6 +27,6 @@ func NodeDelete(app component.AppContext) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse("delete node success"))
+		c.JSON(200, common.SimpleSuccessResponse("SUCCESS"))
 	}
 }

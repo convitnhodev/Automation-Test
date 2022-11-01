@@ -1,7 +1,6 @@
 package nodeTransport
 
 import (
-	"backend_autotest/common"
 	"backend_autotest/component"
 	"backend_autotest/modules/node/nodeBiz"
 	"backend_autotest/modules/node/nodeStorage"
@@ -15,9 +14,7 @@ func NodeList(app component.AppContext) gin.HandlerFunc {
 
 		var data userModel.User
 
-		if err := c.ShouldBindJSON(&data); err != nil {
-			panic(common.ErrInvalidRequest(err))
-		}
+		data.UserName = c.MustGet(component.CurrentUser).(component.Requester).GetUserName()
 
 		store := nodeStorage.NewMongoStore(app.GetNewDataMongoDB())
 		biz := nodeBiz.NewListNodeBiz(store)
@@ -27,6 +24,6 @@ func NodeList(app component.AppContext) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse(result))
+		c.JSON(200, result)
 	}
 }

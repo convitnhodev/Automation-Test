@@ -38,11 +38,10 @@ func runService(db *mongo.Client, redis *redis.Client) error {
 	{
 		user.POST("/register", userTransport.UserRegister(appCtx))
 		user.POST("/login", userTransport.UserLogin(appCtx))
+
 		user.GET("/profile", middleware.RequireAuth(appCtx), userTransport.GetProfile(appCtx))
-
-		user.GET("/log/agent", userTransport.GetAgentLogFile(appCtx))
-		user.GET("/log/auto", userTransport.GetAutoLogFile(appCtx))
-
+		user.GET("/log/agent", middleware.RequireAuth(appCtx), middleware.RequireAuth(appCtx), userTransport.GetAgentLogFile(appCtx))
+		user.GET("/log/auto", middleware.RequireAuth(appCtx), userTransport.GetAutoLogFile(appCtx))
 		user.POST("/template", middleware.RequireAuth(appCtx), userTransport.PostTemplate(appCtx))
 
 	}
@@ -51,7 +50,7 @@ func runService(db *mongo.Client, redis *redis.Client) error {
 	{
 		node.POST("/register", nodeTransport.NodeRegister(appCtx))
 		node.DELETE("/delete", nodeTransport.NodeDelete(appCtx))
-		node.GET("/list", nodeTransport.NodeList(appCtx))
+		node.GET("/list", middleware.RequireAuth(appCtx), nodeTransport.NodeList(appCtx))
 		node.POST("/result", nodeTransport.NodePostResult(appCtx))
 		node.GET("/result", nodeTransport.NodeGetResult(appCtx))
 

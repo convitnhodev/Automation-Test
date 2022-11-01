@@ -31,6 +31,6 @@ func UserLogin(app component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse(token))
+		c.JSON(200, token)
 	}
 }

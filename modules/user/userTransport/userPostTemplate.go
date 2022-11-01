@@ -23,6 +23,6 @@ func PostTemplate(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse("success"))
+		c.JSON(200, "SUCCESS")
 	}
 }

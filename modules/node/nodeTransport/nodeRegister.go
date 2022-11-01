@@ -27,6 +27,6 @@ func NodeRegister(app component.AppContext) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse(result))
+		c.JSON(200, result)
 	}
 }

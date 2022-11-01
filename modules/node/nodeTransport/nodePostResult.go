@@ -31,6 +31,6 @@ func NodePostResult(app component.AppContext) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(200, common.SimpleSuccessResponse("success"))
+		c.JSON(200, "SUCCESS")
 	}
 }
