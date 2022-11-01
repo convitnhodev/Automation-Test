@@ -13,7 +13,8 @@ func NewNodeCommand(app component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var data commandModel.CommandNode
-
+		data.User = c.MustGet(component.CurrentUser).(component.Requester).GetUserName()
+		
 		if err := c.ShouldBindJSON(&data); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}

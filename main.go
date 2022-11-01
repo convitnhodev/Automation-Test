@@ -39,6 +39,12 @@ func runService(db *mongo.Client, redis *redis.Client) error {
 		user.POST("/register", userTransport.UserRegister(appCtx))
 		user.POST("/login", userTransport.UserLogin(appCtx))
 		user.GET("/profile", middleware.RequireAuth(appCtx), userTransport.GetProfile(appCtx))
+
+		user.GET("/log/agent", userTransport.GetAgentLogFile(appCtx))
+		user.GET("/log/auto", userTransport.GetAutoLogFile(appCtx))
+
+		user.POST("/template", middleware.RequireAuth(appCtx), userTransport.PostTemplate(appCtx))
+
 	}
 
 	node := r.Group("/node")
@@ -48,12 +54,17 @@ func runService(db *mongo.Client, redis *redis.Client) error {
 		node.GET("/list", nodeTransport.NodeList(appCtx))
 		node.POST("/result", nodeTransport.NodePostResult(appCtx))
 		node.GET("/result", nodeTransport.NodeGetResult(appCtx))
+
+		node.POST("/log/agent", nodeTransport.PostAgentLogFile(appCtx))
+		node.POST("/log/auto", nodeTransport.PostAutoLogFile(appCtx))
+		node.GET("/template", nodeTransport.GetTemplate(appCtx))
 	}
 
 	command := node.Group("/command")
 	{
-		command.POST("/new", commandTransport.NewNodeCommand(appCtx))
+		command.POST("/new", middleware.RequireAuth(appCtx), commandTransport.NewNodeCommand(appCtx))
 		command.GET("/get", commandTransport.GetAndDeleteCommand(appCtx))
+
 	}
 
 	return r.Run(":8080")

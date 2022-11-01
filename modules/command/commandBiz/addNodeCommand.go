@@ -22,7 +22,7 @@ func NewNodeCommandBiz(store NodeCommandStore) *nodeCommandBiz {
 func (biz *nodeCommandBiz) AddNodeCommand(ctx context.Context, data *commandModel.CommandNode) error {
 
 	for _, eachNode := range data.Nodes {
-		tmp := commandModel.EachNodeCommand{eachNode.NodeId, data.Command, "pending"}
+		tmp := commandModel.EachNodeCommand{eachNode.NodeId, data.Command, data.User}
 		err := biz.store.AddEachNodeCommand(ctx, &tmp)
 		if err != nil {
 			return common.ErrCannotCreateEntity("Node Command", err)

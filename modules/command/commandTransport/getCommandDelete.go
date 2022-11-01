@@ -6,6 +6,8 @@ import (
 	"backend_autotest/modules/command/commandBiz"
 	"backend_autotest/modules/command/commandModel"
 	"backend_autotest/modules/command/commandStorage"
+	"backend_autotest/modules/node/nodeBiz"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,14 +16,21 @@ func GetAndDeleteCommand(app component.AppContext) gin.HandlerFunc {
 
 		var data commandModel.Node
 
-		if err := c.ShouldBindJSON(&data); err != nil {
-			panic(common.ErrInvalidRequest(err))
+		var ok bool
+		data.NodeId, ok = c.GetQuery("node_id")
+		if !ok {
+			panic(common.ErrInvalidRequest(nil))
 		}
 
 		store := commandStorage.NewMongoStore(app.GetNewDataMongoDB())
 		biz := commandBiz.NewFindCommandBiz(store)
 
 		result, err := biz.FindCommandAndDelete(c.Request.Context(), &data)
+		pathAuto := fmt.Sprintf("./fileRepository/nodes/autoLog/%s", data.NodeId)
+		pathAgent := fmt.Sprintf("./fileRepository/nodes/agentLog/%s", data.NodeId)
+		nodeBiz.DeleteAutoLogFile(pathAuto)
+
+		nodeBiz.DeleteAgentLogFile(pathAgent)
 		if err != nil {
 			c.JSON(400, err)
 		}
