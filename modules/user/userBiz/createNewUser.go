@@ -13,11 +13,12 @@ type CreateUserStore interface {
 }
 
 type createUserBiz struct {
-	store CreateUserStore
+	store  CreateUserStore
+	hasher Hasher
 }
 
-func NewCreateUserBiz(store CreateUserStore) *createUserBiz {
-	return &createUserBiz{store}
+func NewCreateUserBiz(store CreateUserStore, hasher Hasher) *createUserBiz {
+	return &createUserBiz{store, hasher}
 }
 
 func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.User) error {
@@ -36,6 +37,8 @@ func (biz *createUserBiz) CreateNewUser(ctx context.Context, data *userModel.Use
 	if user != nil {
 		return common.ErrEntityExisted("User", nil)
 	}
+
+	data.Password = biz.hasher.Hash(data.Password)
 
 	if err := biz.store.CreateUser(ctx, data); err != nil {
 		return common.ErrDB(err)

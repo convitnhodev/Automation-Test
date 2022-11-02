@@ -3,6 +3,7 @@ package userTransport
 import (
 	"backend_autotest/common"
 	"backend_autotest/component"
+	"backend_autotest/component/tokenprovider/hasher"
 	"backend_autotest/modules/user/userBiz"
 	"backend_autotest/modules/user/userModel"
 	"backend_autotest/modules/user/userStorage"
@@ -17,7 +18,8 @@ func UserRegister(app component.AppContext) gin.HandlerFunc {
 		}
 		//
 		store := userStorage.NewMongoStore(app.GetNewDataMongoDB())
-		biz := userBiz.NewCreateUserBiz(store)
+		md5 := hasher.NewMD5Hash()
+		biz := userBiz.NewCreateUserBiz(store, md5)
 		if err := biz.CreateNewUser(c.Request.Context(), &data); err != nil {
 			c.JSON(400, err)
 			return

@@ -5,14 +5,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type appCtx struct {
-	db     *mongo.Client
-	secret string
-	redis  *redis.Client
+type TimeJWT struct {
+	TimeAccess  int
+	TimeRefresh int
 }
 
-func NewAppContext(db *mongo.Client, secret string, redis *redis.Client) *appCtx {
-	return &appCtx{db, secret, redis}
+type appCtx struct {
+	db      *mongo.Client
+	secret  string
+	redis   *redis.Client
+	TimeJWT TimeJWT
+}
+
+func NewAppContext(db *mongo.Client, secret string, redis *redis.Client, timeJWT TimeJWT) *appCtx {
+	return &appCtx{db, secret, redis, timeJWT}
 }
 
 func (app *appCtx) GetNewDataMongoDB() (db *mongo.Client) {
@@ -31,4 +37,9 @@ type AppContext interface {
 	GetNewDataMongoDB() (db *mongo.Client)
 	GetSecret() (secret string)
 	GetRedis() (redis *redis.Client)
+	GetTimeJWT() TimeJWT
+}
+
+func (ctx *appCtx) GetTimeJWT() TimeJWT {
+	return ctx.TimeJWT
 }

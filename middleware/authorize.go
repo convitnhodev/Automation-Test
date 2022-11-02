@@ -3,8 +3,7 @@ package middleware
 import (
 	"backend_autotest/common"
 	"backend_autotest/component"
-	"backend_autotest/component/generatetoken"
-	"backend_autotest/modules/user/userModel"
+	"backend_autotest/component/tokenprovider/jwt"
 	"backend_autotest/modules/user/userStorage"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -31,42 +30,28 @@ func extractTokenFromHeaderString(s string) (string, error) {
 
 func RequireAuth(appCtx component.AppContext) func(c *gin.Context) {
 
-	tokenProvider := generatetoken.NewProviderToken(generatetoken.Payload{}, appCtx.GetSecret())
+	tokenProvider := jwt.NewTokenJWTProvider(appCtx.GetSecret())
 
 	return func(c *gin.Context) {
-
-		redis := appCtx.GetRedis()
 
 		token, err := extractTokenFromHeaderString(c.GetHeader("Authorization"))
 		if err != nil {
 			panic(err)
 		}
 
-		val, err := redis.Get(token).Result()
-
-		if err != nil {
-			c.JSON(401, common.ErrInvalidLogin(err))
-		} else {
-			var user userModel.User
-			user.UserName = val
-			c.Set(component.CurrentUser, &user)
-			c.Next()
-		}
-
 		db := appCtx.GetNewDataMongoDB()
 		store := userStorage.NewMongoStore(db)
 
-		if err := tokenProvider.Decrypt(token); err != nil {
+		payload, err := tokenProvider.Validate(token)
+		if err != nil {
+			c.JSON(401, "token is invalid")
 			panic(err)
 		}
 
-		tmp, err := store.FindUser(c.Request.Context(), bson.M{"user_name": tokenProvider.Core.UserName})
+		user, err := store.FindUser(c.Request.Context(), bson.M{"user_name": payload.UserName})
 		if err != nil {
 			panic(err)
 		}
-
-		var user generatetoken.Payload
-		user.UserName = tmp.UserName
 
 		c.Set(component.CurrentUser, user)
 		c.Next()

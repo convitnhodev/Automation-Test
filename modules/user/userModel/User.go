@@ -12,11 +12,6 @@ type User struct {
 	Company  string `bson:"company,omitempty"`
 }
 
-type UserLogin struct {
-	UserName string `json:"user_name" bson:"user_name,omitempty"`
-	Password string `json:"password"bson:"password"`
-}
-
 func (user *User) Validate() error {
 
 	//check validate of email

@@ -2,44 +2,84 @@ package userBiz
 
 import (
 	"backend_autotest/common"
-	"backend_autotest/component/generatetoken"
+	"backend_autotest/component"
+	"backend_autotest/component/tokenprovider"
 	"backend_autotest/modules/user/userModel"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type LoginUserStore interface {
+type LoginStorage interface {
 	FindUser(ctx context.Context, conditions interface{}) (*userModel.User, error)
 }
 
-type loginUserBiz struct {
-	store CreateUserStore
+type Hasher interface {
+	Hash(data string) string
 }
 
-func NewLoginUserBiz(store CreateUserStore) *createUserBiz {
-	return &createUserBiz{store}
+type setTime struct {
+	timeAccess int
 }
 
-func (biz *createUserBiz) LoginUser(ctx context.Context, data *userModel.UserLogin, secret string) (string, error) {
+func NewSetTime(timeAccess int) *setTime {
+	return &setTime{
+		timeAccess: timeAccess,
+	}
+}
 
-	user, err := biz.store.FindUser(ctx, bson.M{"user_name": data.UserName})
+type TokenConfig interface {
+	GetAtExp() int
+}
+
+func (timeSet *setTime) GetAtExp() int {
+	return timeSet.timeAccess
+}
+
+type loginBusiness struct {
+	appCtx        component.AppContext
+	storeUser     LoginStorage
+	tokenProvider tokenprovider.Provider
+	hasher        Hasher
+	tkCfg         TokenConfig
+}
+
+func NewLoginBusiness(storeUser LoginStorage, tokenProvider tokenprovider.Provider, hasher Hasher, tkCfg TokenConfig) *loginBusiness {
+	return &loginBusiness{
+		storeUser:     storeUser,
+		tokenProvider: tokenProvider,
+		hasher:        hasher,
+		tkCfg:         tkCfg,
+	}
+}
+
+func (biz *loginBusiness) Login(ctx context.Context, data *userModel.UserLogin) (*tokenprovider.Account, error) {
+	user, err := biz.storeUser.FindUser(ctx, bson.M{"user_name": data.UserName})
 	if err != nil {
 		if err.Error() != common.RecordNotFound {
-			return "", common.ErrDB(err)
+			return nil, common.ErrDB(err)
 		}
-		return "", common.ErrInvalidLogin(err)
+		return nil, common.ErrInvalidLogin(err)
 	}
 
-	if user.Password != data.Password {
-		return "", common.ErrInvalidLogin(err)
+	passHash := biz.hasher.Hash(data.Password)
+
+	if user.Password != passHash {
+		return nil, common.ErrInvalidLogin(err)
 	}
 
-	payload := generatetoken.Payload{data.UserName}
-	provider := generatetoken.NewProviderToken(payload, secret)
-	token, err := provider.Encrypt()
+	payload := tokenprovider.TokenPayload{
+		UserName: user.UserName,
+	}
+
+	accessToken, err := biz.tokenProvider.Generate(payload, biz.tkCfg.GetAtExp())
 	if err != nil {
-		return "", common.ErrInvalidLogin(err)
+		return nil, common.GenerateJWTFail(err)
 	}
 
-	return token, nil
+	account := tokenprovider.Account{
+		AccessToken: accessToken,
+	}
+
+	return &account, nil
+
 }

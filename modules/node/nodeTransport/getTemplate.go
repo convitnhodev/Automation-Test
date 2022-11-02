@@ -34,6 +34,6 @@ func GetTemplate(appCtx component.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(200, bytefile)
+		c.JSON(200, string(bytefile))
 	}
 }

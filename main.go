@@ -20,11 +20,9 @@ func main() {
 
 	db := common.InitMongoDB()
 
-	redis := common.InitRedis()
-
 	fmt.Println(db)
 
-	if err := runService(db, redis); err != nil {
+	if err := runService(db, nil); err != nil {
 		log.Fatalln(err)
 	}
 
@@ -32,7 +30,9 @@ func main() {
 
 func runService(db *mongo.Client, redis *redis.Client) error {
 	r := gin.Default()
-	appCtx := component.NewAppContext(db, "abc&1*~#^2^#s0^=)^^7%b34", redis)
+
+	time := component.TimeJWT{60 * 60 * 24 * 2, 60 * 60 * 24 * 2}
+	appCtx := component.NewAppContext(db, "anhHaudungboemnhe", redis, time)
 
 	user := r.Group("/user")
 	{
@@ -40,7 +40,7 @@ func runService(db *mongo.Client, redis *redis.Client) error {
 		user.POST("/login", userTransport.UserLogin(appCtx))
 
 		user.GET("/profile", middleware.RequireAuth(appCtx), userTransport.GetProfile(appCtx))
-		user.GET("/log/agent", middleware.RequireAuth(appCtx), middleware.RequireAuth(appCtx), userTransport.GetAgentLogFile(appCtx))
+		user.GET("/log/agent", middleware.RequireAuth(appCtx), userTransport.GetAgentLogFile(appCtx))
 		user.GET("/log/auto", middleware.RequireAuth(appCtx), userTransport.GetAutoLogFile(appCtx))
 		user.POST("/template", middleware.RequireAuth(appCtx), userTransport.PostTemplate(appCtx))
 
